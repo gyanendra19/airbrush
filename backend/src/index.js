@@ -11,7 +11,6 @@ import contentRoutes from './routes/contentRoutes.js';
 import imagesRoute from './routes/imagesRoute.js';
 import blogRoutes from './routes/blogRoutes.js';
 import generatorRoutes from './routes/generatorRoutes.js';
-import pageRoutes from './routes/pageRoutes.js';
 
 // Configure environment variables
 dotenv.config();
@@ -41,6 +40,5 @@ router.use('/content', contentRoutes);
 router.use('/images', imagesRoute);
 router.use('/blog', blogRoutes);
 router.use('/free-generators', generatorRoutes);
-router.use('/pages', pageRoutes);
 
 export default router;
