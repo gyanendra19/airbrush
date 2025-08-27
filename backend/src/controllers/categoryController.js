@@ -1,7 +1,6 @@
 import Category from "../models/Category.js";
 import Section from "../models/Section.js";
 import Content from "../models/Content.js";
-import { triggerSitemapUpdate } from "../utils/sitemapUtils.js";
 
 // Get all root categories
 export const getCategories = async (req, res) => {
