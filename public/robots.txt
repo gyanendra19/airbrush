@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Allow all web crawlers to access all content
+Disallow:
+
+# Sitemap location
+Sitemap: https://airbrush.ai/sitemap.xml
