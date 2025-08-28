@@ -120,25 +120,6 @@ async function fetchCategories(req) {
   }
 }
 
-// Function to fetch pages from API
-async function fetchPages(req) {
-  try {
-    const baseUrl = getBaseUrl(req);
-    const response = await fetch(`${baseUrl}/api/pages`);
-    if (!response.ok) {
-      if (response.status === 404) {
-        return [];
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching pages:', error);
-    return [];
-  }
-}
-
 // Function to fetch free generators from API
 async function fetchFreeGenerators(req) {
   try {
@@ -274,7 +255,6 @@ async function updateSitemap() {
     
     // Use fetchCategories and fetchPages functions to get data
     const categories = await fetchCategories();
-    const pages = await fetchPages();
     
     let sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -302,20 +282,6 @@ async function updateSitemap() {
       });
     } else {
       console.log('No categories found for sitemap');
-    }
-
-    // Add other pages to sitemap
-    if (pages && pages.length > 0) {
-      console.log(`Adding ${pages.length} pages to sitemap`);
-      pages.forEach(page => {
-        sitemapContent += `
-  <url>
-    <loc>https://airbrush.ai/${page.slug || page._id}</loc>
-    <lastmod>${new Date(page.updatedAt || Date.now()).toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
-      });
     }
 
     sitemapContent += '\n</urlset>';

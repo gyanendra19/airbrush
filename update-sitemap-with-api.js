@@ -12,7 +12,7 @@ const sitemapPath = path.join(__dirname, 'public', 'sitemap.xml');
 async function fetchCategories() {
   try {
     // Use the API endpoint to fetch categories
-    const response = await fetch('http://localhost:8001/api/categories');
+    const response = await fetch('/api/categories');
     
     if (!response.ok) {
       throw new Error(`Failed to fetch categories: ${response.status}`);
@@ -27,33 +27,12 @@ async function fetchCategories() {
   }
 }
 
-// Function to fetch pages from API
-async function fetchPages() {
-  try {
-    // Use the API endpoint to fetch pages
-    const response = await fetch('http://localhost:8001/api/pages');
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch pages: ${response.status}`);
-    }
-    
-    const pages = await response.json();
-    console.log(`Successfully fetched ${pages.length} pages`);
-    return pages;
-  } catch (error) {
-    console.error('Error fetching pages:', error);
-    return [];
-  }
-}
-
 // Function to update sitemap with categories and pages from API
 async function updateSitemapWithApi() {
   try {
     // Fetch categories from API
     const categories = await fetchCategories();
     
-    // Fetch pages from API
-    const pages = await fetchPages();
     
     let sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -81,22 +60,6 @@ async function updateSitemapWithApi() {
       });
     } else {
       console.log('No categories found for sitemap');
-    }
-    
-    // Add pages to sitemap
-    if (pages && pages.length > 0) {
-      console.log(`Adding ${pages.length} pages to sitemap`);
-      pages.forEach(page => {
-        sitemapContent += `
-  <url>
-    <loc>https://airbrush.ai/${page.slug || page._id}</loc>
-    <lastmod>${new Date(page.updatedAt || Date.now()).toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
-      });
-    } else {
-      console.log('No pages found for sitemap');
     }
 
     sitemapContent += '\n</urlset>';
