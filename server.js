@@ -91,7 +91,11 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(cookieParser());
 
 // Function to get base URL
+// Function to get base URL
 function getBaseUrl(req) {
+  if (!req) {
+    return process.env.NODE_ENV === 'production' ? 'https://airbrush.ai' : 'http://localhost:8000';
+  }
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
   const host = req.get('host');
   return `${protocol}://${host}`;
@@ -103,12 +107,16 @@ async function fetchCategories(req) {
     const baseUrl = getBaseUrl(req);
     const response = await fetch(`${baseUrl}/api/categories`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch categories: ${response.status}`);
+      if (response.status === 404) {
+        return [];
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error fetching categories:', error);
-    return { data: [] };
+    return [];
   }
 }
 
@@ -118,9 +126,13 @@ async function fetchPages(req) {
     const baseUrl = getBaseUrl(req);
     const response = await fetch(`${baseUrl}/api/pages`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch pages: ${response.status}`);
+      if (response.status === 404) {
+        return [];
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error fetching pages:', error);
     return [];
@@ -260,12 +272,9 @@ async function updateSitemap() {
       return;
     }
     
-    // Use fetchCategories function to get categories
-    const mockReq = { get: (key) => key === 'host' ? 'localhost:8000' : 'http' };
-    const categories = await fetchCategories(mockReq);
-    
-    // Use fetchPages function to get pages
-    const pages = await fetchPages(mockReq);
+    // Use fetchCategories and fetchPages functions to get data
+    const categories = await fetchCategories();
+    const pages = await fetchPages();
     
     let sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -358,6 +367,12 @@ app.get("/pricing", (req, res) => {
 });
 
 app.get("/404", (req, res) => {
+  // Check if the request accepts JSON
+  if (req.accepts('json')) {
+    return res.status(404).json({ message: 'Page not found' });
+  }
+  
+  // Otherwise render the HTML page
   res.render("404", {
     layout: "main",
     title: "404 - Page Not Found"
